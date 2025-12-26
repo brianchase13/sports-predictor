@@ -153,13 +153,17 @@ export default function Home() {
             </span>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {highConfidencePicks.map((prediction) => (
-              <PredictionCard
+            {highConfidencePicks.map((prediction, index) => (
+              <div
                 key={prediction.id}
-                prediction={prediction}
-                onAnalyze={() => handleAnalyze(prediction.gameId)}
-                isAnalyzing={analyzingGame === prediction.gameId}
-              />
+                className={`animate-stagger stagger-${Math.min(index + 1, 8)}`}
+              >
+                <PredictionCard
+                  prediction={prediction}
+                  onAnalyze={() => handleAnalyze(prediction.gameId)}
+                  isAnalyzing={analyzingGame === prediction.gameId}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -176,13 +180,17 @@ export default function Home() {
             </span>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {regularPicks.map((prediction) => (
-              <PredictionCard
+            {regularPicks.map((prediction, index) => (
+              <div
                 key={prediction.id}
-                prediction={prediction}
-                onAnalyze={() => handleAnalyze(prediction.gameId)}
-                isAnalyzing={analyzingGame === prediction.gameId}
-              />
+                className={`animate-stagger stagger-${Math.min(index + 1, 8)}`}
+              >
+                <PredictionCard
+                  prediction={prediction}
+                  onAnalyze={() => handleAnalyze(prediction.gameId)}
+                  isAnalyzing={analyzingGame === prediction.gameId}
+                />
+              </div>
             ))}
           </div>
         </div>

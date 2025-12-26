@@ -18,6 +18,8 @@ import { format } from 'date-fns';
 import { CheckCircle, XCircle, TrendingUp, Target, Award, Trophy, RefreshCw } from 'lucide-react';
 import { useDashboard } from '@/components/DashboardLayout';
 import { toast } from '@/components/ui/sonner';
+import { AnimatedCounter, AnimatedPercentage } from '@/components/AnimatedCounter';
+import { StreakBadge, calculateStreak } from '@/components/StreakBadge';
 
 interface HistoryData {
   predictions: (Prediction & { wasCorrect: boolean })[];
@@ -271,7 +273,7 @@ export default function HistoryPage() {
       {!loading && !error && data && (
         <>
           <div className="grid gap-4 md:grid-cols-3">
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="hover:shadow-md transition-shadow card-interactive">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Total Predictions
@@ -281,14 +283,17 @@ export default function HistoryPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{data.stats.total}</div>
+                <AnimatedCounter
+                  value={data.stats.total}
+                  className="text-3xl font-bold"
+                />
                 <p className="text-xs text-muted-foreground mt-1">
                   {dateRange.label}
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="hover:shadow-md transition-shadow card-interactive">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Overall Accuracy
@@ -298,16 +303,26 @@ export default function HistoryPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                  {data.stats.accuracy.toFixed(1)}%
+                <AnimatedPercentage
+                  value={data.stats.accuracy}
+                  className="text-3xl font-bold text-emerald-600 dark:text-emerald-400"
+                  delay={100}
+                />
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-xs text-muted-foreground">
+                    {data.stats.correct} correct predictions
+                  </p>
+                  {predictions.length > 0 && (
+                    <StreakBadge
+                      {...calculateStreak(predictions.slice(0, 10).map(p => p.wasCorrect))}
+                      size="sm"
+                    />
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {data.stats.correct} correct predictions
-                </p>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="hover:shadow-md transition-shadow card-interactive">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Best Performing Sport
@@ -326,7 +341,7 @@ export default function HistoryPage() {
                       {SPORTS[bestSport.sport as Sport]?.name}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {bestSport.accuracy.toFixed(1)}% accuracy
+                      <AnimatedPercentage value={bestSport.accuracy} delay={200} /> accuracy
                     </p>
                   </>
                 ) : (

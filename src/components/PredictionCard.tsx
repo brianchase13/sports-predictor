@@ -25,6 +25,9 @@ import { ConfidenceBadge } from './ConfidenceMeter';
 import { VenueLink } from './VenueLink';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Spinner } from '@/components/ui/spinner';
+import { ProbabilityBar } from './ProbabilityBar';
+import { ConnectedFavoriteButton } from './FavoriteButton';
+import { ShareButton } from './ShareButton';
 import { cn } from '@/lib/utils';
 
 interface PredictionCardProps {
@@ -69,8 +72,22 @@ export function PredictionCard({
     return 'text-rose-600 dark:text-rose-400';
   };
 
+  // Get team colors with fallbacks
+  const homeColor = game.homeTeam.primaryColor || sportInfo.color;
+  const awayColor = game.awayTeam.primaryColor || '#6b7280'; // gray-500 fallback
+  const predictedTeamColor = predictedTeam?.primaryColor || sportInfo.color;
+  const isHighConfidence = prediction.confidence >= 75;
+
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 animate-fade-in-up">
+    <Card
+      className={cn(
+        'overflow-hidden transition-all duration-300 animate-fade-in-up team-accent-left card-interactive',
+        isHighConfidence && 'high-confidence-glow'
+      )}
+      style={{
+        '--team-color': predictedTeamColor,
+      } as React.CSSProperties}
+    >
       {/* Header - Always visible */}
       <div className="px-4 py-3 border-b bg-muted/30">
         <div className="flex items-center justify-between">
@@ -81,9 +98,17 @@ export function PredictionCard({
           >
             {sportInfo.icon} {sportInfo.name}
           </Badge>
-          <span className="text-sm text-muted-foreground">
-            {format(new Date(game.startTime), 'MMM d, h:mm a')}
-          </span>
+          <div className="flex items-center gap-1">
+            <span className="text-sm text-muted-foreground mr-1">
+              {format(new Date(game.startTime), 'MMM d, h:mm a')}
+            </span>
+            <ConnectedFavoriteButton predictionId={prediction.id} size="sm" />
+            <ShareButton
+              title={`${game.awayTeam.abbreviation} @ ${game.homeTeam.abbreviation} Prediction`}
+              text={`Check out this ${sportInfo.name} prediction: ${predictedTeam?.name || 'Draw'} with ${prediction.confidence}% confidence!`}
+              size="sm"
+            />
+          </div>
         </div>
       </div>
 
@@ -152,31 +177,25 @@ export function PredictionCard({
           </CollapsibleTrigger>
           <CollapsibleContent>
             <div className="space-y-3 mt-2">
-              {/* Win Probability */}
+              {/* Win Probability Bar */}
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   Win Probability
                 </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="text-center p-2 rounded-md bg-muted/30">
-                    <span className="text-xs font-medium">{game.awayTeam.abbreviation}</span>
-                    <p className="text-base font-bold">
-                      {(prediction.awayWinProbability * 100).toFixed(0)}%
-                    </p>
-                  </div>
-                  <div className="text-center p-2 rounded-md bg-muted/30">
-                    <span className="text-xs font-medium">{game.homeTeam.abbreviation}</span>
-                    <p className="text-base font-bold">
-                      {(prediction.homeWinProbability * 100).toFixed(0)}%
-                    </p>
-                  </div>
-                </div>
+                <ProbabilityBar
+                  homeTeam={game.homeTeam.abbreviation}
+                  awayTeam={game.awayTeam.abbreviation}
+                  homeWinProbability={prediction.homeWinProbability * 100}
+                  homeColor={homeColor}
+                  awayColor={awayColor}
+                  size="md"
+                />
                 {prediction.drawProbability && prediction.drawProbability > 0 && (
-                  <div className="text-center p-2 rounded-md bg-muted/30">
-                    <span className="text-xs font-medium">Draw</span>
-                    <p className="text-base font-bold">
+                  <div className="text-center p-1.5 rounded-md bg-muted/30 text-sm">
+                    <span className="text-muted-foreground">Draw: </span>
+                    <span className="font-bold">
                       {(prediction.drawProbability * 100).toFixed(0)}%
-                    </p>
+                    </span>
                   </div>
                 )}
               </div>

@@ -75,6 +75,8 @@ export interface Team {
   eloRating: number;
   logoUrl?: string;
   city?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
   record?: {
     wins: number;
     losses: number;
