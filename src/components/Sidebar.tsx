@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Sport, SPORTS } from '@/lib/types';
 import { LeagueLogo } from './LeagueLogo';
-import { BarChart3, History, Trophy } from 'lucide-react';
+import { StreakCounter } from './StreakCounter';
+import { AccuracyBadge } from './AccuracyBadges';
+import { BarChart3, History, Trophy, Award } from 'lucide-react';
 
 interface SidebarProps {
   onSportSelect?: (sport: Sport | null) => void;
@@ -110,6 +112,25 @@ export function Sidebar({
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* User Stats Section */}
+      <div className="px-4 py-4 border-t border-sidebar-border space-y-3">
+        {/* Streak */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Your Streak
+          </span>
+          <StreakCounter size="sm" />
+        </div>
+
+        {/* Accuracy */}
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Accuracy
+          </span>
+          <AccuracyBadge size="sm" />
         </div>
       </div>
     </aside>

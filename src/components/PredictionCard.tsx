@@ -26,8 +26,12 @@ import { VenueLink } from './VenueLink';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Spinner } from '@/components/ui/spinner';
 import { ProbabilityBar } from './ProbabilityBar';
+import { PickDistributionBar } from './PickDistributionBar';
 import { ConnectedFavoriteButton } from './FavoriteButton';
 import { ShareButton } from './ShareButton';
+import { useStreak } from '@/hooks/use-streak';
+import { usePickHistory } from '@/hooks/use-pick-history';
+import { toast } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 
 interface PredictionCardProps {
@@ -45,9 +49,39 @@ export function PredictionCard({
 }: PredictionCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(defaultExpanded);
   const [analysisOpen, setAnalysisOpen] = useState(defaultExpanded);
+  const { recordPick, hasPickedToday, currentStreak } = useStreak();
+  const { addPick, getPick } = usePickHistory();
 
   const game = prediction.game;
   if (!game) return null;
+
+  const userPick = getPick(prediction.gameId);
+
+  const handleMakePick = () => {
+    // Record the pick in history
+    addPick({
+      gameId: prediction.gameId,
+      sport: game.sport,
+      pick: 'home', // Will be overridden by PickDistributionBar
+      homeTeam: game.homeTeam.name,
+      awayTeam: game.awayTeam.name,
+      gameTime: new Date(game.startTime).getTime(),
+      confidence: prediction.confidence,
+    });
+
+    // Update streak
+    if (!hasPickedToday) {
+      recordPick();
+      toast.success(
+        currentStreak === 0
+          ? '🔥 Streak started!'
+          : `🔥 ${currentStreak + 1} day streak!`,
+        {
+          description: 'Keep picking daily to build your streak!',
+        }
+      );
+    }
+  };
 
   const sportInfo = SPORTS[game.sport];
   const hasAnalysis = prediction.enhancedAnalysis || prediction.llmAnalysis;
@@ -166,6 +200,17 @@ export function PredictionCard({
             {prediction.confidence}%
           </span>
         </div>
+
+        {/* Community Picks */}
+        <PickDistributionBar
+          gameId={prediction.gameId}
+          homeTeam={game.homeTeam.abbreviation}
+          awayTeam={game.awayTeam.abbreviation}
+          homeColor={homeColor}
+          awayColor={awayColor}
+          showDraw={prediction.drawProbability !== undefined && prediction.drawProbability > 0}
+          onPick={handleMakePick}
+        />
 
         {/* Details Section - Collapsible */}
         <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>

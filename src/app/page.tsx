@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { RefreshCw, Sparkles, Trophy } from 'lucide-react';
 import { useDashboard } from '@/components/DashboardLayout';
+import { PickOfTheDay } from '@/components/PickOfTheDay';
 import { toast } from '@/components/ui/sonner';
 
 export default function Home() {
@@ -107,6 +108,13 @@ export default function Home() {
   const highConfidencePicks = predictions.filter((p) => p.confidence >= 70);
   const regularPicks = predictions.filter((p) => p.confidence < 70);
 
+  // Pick of the Day: highest confidence upcoming game
+  const pickOfTheDay = predictions.length > 0
+    ? predictions.reduce((best, current) =>
+        current.confidence > best.confidence ? current : best
+      )
+    : null;
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -122,6 +130,17 @@ export default function Home() {
           Refresh
         </Button>
       </div>
+
+      {/* Pick of the Day */}
+      {!loading && !error && pickOfTheDay && (
+        <PickOfTheDay
+          prediction={pickOfTheDay}
+          onViewDetails={() => {
+            setSelectedPrediction(pickOfTheDay);
+            setDialogOpen(true);
+          }}
+        />
+      )}
 
       {/* Sport Filter */}
       <SportSelector selectedSport={selectedSport} onSelect={setSelectedSport} />
